@@ -28,6 +28,7 @@ function auth_data(dobby, cb) {
 }
 
 exports.init = function(dobby) {
+    return;
     async.forever(function(next) {
         dobby.client_list(function(err, list) {
             if (!err) {
@@ -76,6 +77,48 @@ exports.onMessage = function(msg, dobby) {
                     dobby.respond("I don't know. Have you signed up on quibs.org and/or linked your account?")
                 }
             })
+        case '.q':
+            var s = /^\.q add (.+)$/.exec(msg)
+
+            if (s) {
+                var newquote = s[1];
+
+                auth_data(dobby, function(err, auth) {
+                    if (auth) {
+                        db.query("INSERT INTO quotes(id, text, uid) VALUES (NULL, ?, ?)", [newquote, auth.id], function(err) {
+                            if (!err) {
+                                dobby.respond("Quote added.")
+                            } else {
+                                dobby.respond("There was an error!")
+                            }
+                        })
+                    } else {
+                        dobby.respond("You're not linked with a quibs.org account!")
+                    }
+                })
+            } else {
+                var s = /^\.q ([0-9]+)$/.exec(msg)
+
+                if (s) {
+                    var quoteid = parseInt(s[1]);
+
+                    db.query("SELECT * FROM quotes WHERE id=?", [quoteid], function(err, quotes) {
+                        if (quotes.length == 1) {
+                            var q = quotes[0];
+
+                            dobby.respond("[B]Quote #" + q.id + "[/B]: " + q.text);
+                        } else {
+                            dobby.respond("Quote ID does not exist.");
+                        }
+                    })
+                } else {
+                    db.query("SELECT * FROM quotes", [], function(err, quotes) {
+                        var q = quotes[Math.floor(Math.random() * quotes.length)];
+
+                        dobby.respond("[B]Quote #" + q.id + "[/B]: " + q.text);
+                    });
+                }
+            }
         break;
     }
 }
