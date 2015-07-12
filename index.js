@@ -77,6 +77,7 @@ exports.onMessage = function(msg, dobby) {
                     dobby.respond("I don't know. Have you signed up on quibs.org and/or linked your account?")
                 }
             })
+        break;
         case '.q':
             var s = /^\.q add (.+)$/.exec(msg)
 
