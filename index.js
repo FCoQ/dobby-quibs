@@ -69,6 +69,24 @@ exports.onMessage = function(msg, dobby) {
     terms = terms.join(" ");
 
     switch (command) {
+        case '.banner':
+            dobby.client_from.is_admin(function(err, is_admin) {
+                if (!err && is_admin) {
+                    dobby.send("serveredit", {
+                        virtualserver_hostbanner_gfx_url: "https://quibs.org/uploads/soxltynooi9k_orig.png",
+                        virtualserver_hostbanner_mode: 2
+                    }, function (err) {
+                        if (err) {
+                            console.warn("Error editing banner!" + JSON.stringify(err))
+                        } else {
+                            console.log("Banner set!")
+                        }
+                    })
+                } else {
+                    dobby.client_from.private_message('Not an admin!')
+                }
+            })
+            break;
         case '.whoami':
             auth_data(dobby, function(err, auth) {
                 if (auth) {
@@ -77,7 +95,7 @@ exports.onMessage = function(msg, dobby) {
                     dobby.respond("I don't know. Have you signed up on quibs.org and/or linked your account?")
                 }
             })
-        break;
+            break;
         case '.q':
             var s = /^\.q add (.+)$/.exec(msg)
 
@@ -120,6 +138,7 @@ exports.onMessage = function(msg, dobby) {
                     });
                 }
             }
-        break;
+            break;
     }
 }
+
