@@ -58,7 +58,17 @@ function gallery_submit(url, uid, cb) {
 }
 
 exports.init = function(dobby) {
-    return;
+    async.forever(function(next) {
+        dobby.server_info(function(err, info) {
+            if (!err) {
+                gallery_submit(info.virtualserver_hostbanner_gfx_url, 0, function() {
+                    setTimeout(next, 10000);
+                })
+            } else {
+                setTimeout(next, 10000);
+            }
+        })
+    })
     async.forever(function(next) {
         dobby.client_list(function(err, list) {
             if (!err) {
