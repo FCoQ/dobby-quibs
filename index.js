@@ -6,6 +6,12 @@ var unirest = require('unirest')
 
 var secret = ""
 
+exports.help = [
+    [".q[ <id>]", "Get a random quote, or a quote by ID"],
+    [".whoami", "See if you're linked with quibs.org"],
+    [".gallery <url>", "Add a new image to the gallery by URL"]
+]
+
 exports.config = function(cfg) {
     db.init(cfg.dbhost, cfg.dbuser, cfg.dbpass, cfg.dbname)
 
