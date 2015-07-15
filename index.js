@@ -2,9 +2,19 @@
 
 var db = require('./db');
 var async = require('async');
+var unirest = require('unirest')
+
+var secret = ""
 
 exports.config = function(cfg) {
     db.init(cfg.dbhost, cfg.dbuser, cfg.dbpass, cfg.dbname)
+
+    if (typeof cfg.secret == "undefined") {
+        console.warn("`secret` field not defined under [quibs] in configuration.")
+        process.exit()
+    }
+
+    secret = cfg.secret;
 }
 
 function auth_data(dobby, cb) {
@@ -23,6 +33,26 @@ function auth_data(dobby, cb) {
             })
         } else {
             cb(err)
+        }
+    })
+}
+
+function gallery_submit(url, uid, cb) {
+    db.query("SELECT * FROM `images` WHERE `orig`=?", [url], function(err, results) {
+        if (err) return cb(err);
+
+        if (results.length > 0) {
+            cb("Already have this image in the gallery.")
+        } else {
+            unirest.get("https://quibs.org/ts3_img.php")
+                .query({pass: secret, url: url})
+                .end(function(response) {
+                    if (response.status == 200) {
+                        cb(null)
+                    } else {
+                        cb("Server error.")
+                    }
+                })
         }
     })
 }
@@ -69,6 +99,27 @@ exports.onMessage = function(msg, dobby) {
     terms = terms.join(" ");
 
     switch (command) {
+        case '.gallery':
+            auth_data(dobby, function(err, auth) {
+                if (auth) {
+                    var r = /(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/i.exec(terms)
+
+                    if (r) {
+                        gallery_submit(r[0], auth.id, function(err) {
+                            if (!err) {
+                                dobby.respond("Submitted.")
+                            } else {
+                                dobby.respond("There was an error: " + err);
+                            }
+                        })
+                    } else {
+                        dobby.respond("URL looks weird.")
+                    }
+                } else {
+                    dobby.respond("Unauthorized. Have you signed up on quibs.org and/or linked your account?")
+                }
+            })
+            break;
         case '.banner':
             dobby.client_from.is_admin(function(err, is_admin) {
                 if (!err && is_admin) {
