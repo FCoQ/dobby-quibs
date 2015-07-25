@@ -115,6 +115,70 @@ exports.onMessage = function(msg, dobby) {
     terms = terms.join(" ");
 
     switch (command) {
+        case '.womp':
+            dobby.client_from.is_admin(function(err, is_admin) {
+                if (!err && is_admin) {
+                    var r = /^([0-9]+)([smhdy]) (.+)$/.exec(terms);
+
+                    if (!r) {
+                        dobby.respond("Usage: .womp <time> <username>");
+                    } else {
+                        var num = parseInt(r[1]);
+                        var unit = r[2];
+                        var username = r[3];
+
+                        switch (unit) {
+                            case 's':
+                                break;
+                            case 'm':
+                                num *= 60;
+                                break;
+                            case 'h':
+                                num *= 60*60;
+                                break;
+                            case 'd':
+                                num *= 60*60*24;
+                                break;
+                            case 'y':
+                                num *= 60*60*24*365;
+                                break;
+                        }
+
+                        dobby.find_clients(username, function(err, clients) {
+                            if (!err) {
+                                if (clients.length == 1) {
+                                    async.series({
+                                        ip: function(cb) {
+                                            clients[0].get_ip(cb)
+                                        },
+                                        username: function(cb) {
+                                            clients[0].get_name(cb)
+                                        }
+                                    }, function(err, results) {
+                                        if (!err) {
+                                            db.query("INSERT INTO `ipbans` (`ip`, `note`, `expires`) VALUES (?, ?, ?)",
+                                                [results.ip, "womped " + results.username + " via teamspeak", Math.floor(Date.now() / 1000) + num],
+                                                function() {
+                                                    dobby.respond(results.username + " got the night off.");
+                                                });
+                                        } else {
+                                            console.warn("womp error: " + JSON.serialize(err));
+                                        }
+                                    })
+                                } else if (clients.length == 0) {
+                                    dobby.respond("Couldn't find anyone by that username!")
+                                } else {
+                                    // todo!
+                                    dobby.respond("Ambiguous username.");
+                                }
+                            } else {
+                                dobby.respond("Error!");
+                            }
+                        })
+                    }
+                }
+            });
+            break;
         case '.gallery':
             auth_data(dobby, function(err, auth) {
                 if (auth) {
