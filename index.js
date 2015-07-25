@@ -227,6 +227,12 @@ exports.onMessage = function(msg, dobby) {
                 }
             })
             break;
+        case '.cam':
+            var q = dobby.cache.get("camquotes");
+            if (q) {
+                dobby.respond("" + q.num);
+            }
+            break;
         case '.q':
             var s = /^\.q add (.+)$/.exec(msg)
 
@@ -266,6 +272,16 @@ exports.onMessage = function(msg, dobby) {
                         var q = quotes[Math.floor(Math.random() * quotes.length)];
 
                         dobby.respond("[B]Quote #" + q.id + "[/B]: " + q.text);
+                        dobby.client_from.get_uid(function(err, uid) {
+                            if (uid=='4Zrez/T+o7ndhh6uMYh2MRBcQfU=' || uid=='6fRwiLWw+IisueiFa6sEbk+UyPI=') {
+                                var q = dobby.cache.get("camquotes");
+                                if (!q) {
+                                    dobby.cache.put("camquotes", {num: 1})
+                                } else {
+                                    dobby.cache.put("camquotes", {num: q.num + 1})
+                                }
+                            }
+                        })
                     });
                 }
             }
