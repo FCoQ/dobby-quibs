@@ -45,7 +45,7 @@ exports.query = function(query, params, callback) {
 }
 
 // transaction system; we spawn a new connection for each transaction
-exports.transaction = function(queries, cb) {
+exports.transaction = function(queries, maincb) {
 	var newconnection = mysql.createConnection({
 		host: ctx.dbhost,
 		port: 3306,
@@ -53,6 +53,12 @@ exports.transaction = function(queries, cb) {
 		password: ctx.dbpass,
 		database: ctx.dbname
 	})
+
+	var cb = function(a, b) {
+		newconnection.close();
+
+		maincb(a, b)
+	}
 
 	newconnection.beginTransaction(function(err) {
 		if (err) {
