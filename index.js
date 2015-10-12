@@ -251,8 +251,17 @@ exports.onMessage = function(msg, dobby) {
 
             break;
         case '.qst':
-            var d = new Date().toLocaleTimeString().toString();
-            dobby.respond(d)
+            function hour12 (hour) {
+                var mod = hour % 12;
+
+                if (mod < 10) {
+                    return '0'.concat(mod);
+                } else {
+                    return mod;
+                }
+            }
+            var date = new Date()
+            dobby.respond(date.toLocaleTimeString().replace(/[\d]+/, hour12(date.getHours())) + " " + function() { if (date.getHours() >= 12) { return "PM"; } else { return "AM"; } }());
             break;
         case '.q':
             var s = /^\.q add (.+)$/.exec(msg)
