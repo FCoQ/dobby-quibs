@@ -261,7 +261,7 @@ exports.onMessage = function(msg, dobby) {
                 }
             }
             var date = new Date()
-            dobby.respond(date.toLocaleTimeString().replace(/[\d]+/, hour12(date.getHours())) + " " + function() { if (date.getHours() >= 11) { return "PM"; } else { return "AM"; } }());
+            dobby.respond(date.toLocaleTimeString().replace(/[\d]+/, hour12(date.getHours())) + " " + function() { if (date.getHours() >= 12) { return "PM"; } else { return "AM"; } }());
             break;
         case '.q':
             var s = /^\.q add (.+)$/.exec(msg)
