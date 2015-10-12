@@ -2,6 +2,7 @@
 
 var db = require('./db');
 var async = require('async');
+var fs = require('fs');
 
 exports.config = function(cfg) {
     db.init(cfg.dbhost, cfg.dbuser, cfg.dbpass, cfg.dbname)
@@ -95,6 +96,25 @@ exports.onMessage = function(msg, dobby) {
                     dobby.respond("I don't know. Have you signed up on quibs.org and/or linked your account?")
                 }
             })
+            break;
+        case '.newf':
+                fs.readFile("./plugins/contrib/quibs/newf.txt", "utf8", function(err, data){
+                    if(err) throw err;
+                    var lines = data.split("\n");
+                    var saying = lines[Math.floor(Math.random()*lines.length)]
+                    var bold = /^(.*?)-/.exec(saying);
+                    var notbold = /\-(.*)/.exec(saying);
+                    if (Array.isArray(bold)){
+                        dobby.respond("[b]" + bold[0] + "[/b]" + notbold[1])
+                    } else {
+                        dobby.respond("B'y der was a friggin error!")
+                    }
+                })
+
+            break;
+        case '.qst':
+            var d = new Date().toLocaleTimeString().toString();
+            dobby.respond(d)
             break;
         case '.q':
             var s = /^\.q add (.+)$/.exec(msg)
