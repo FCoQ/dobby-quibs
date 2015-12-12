@@ -36,8 +36,8 @@ exports.init = function(dbhost, dbuser, dbpass, dbname) {
 }
 
 exports.query = function(query, params, callback) {
-	console.log('PERFORMING QUERY ' + query);
-	console.log('	PARAMS: ' + params);
+	//console.log('PERFORMING QUERY ' + query);
+	//console.log('	PARAMS: ' + params);
 
 	connection.execute(query, params, function(err, rows, fields) {
 		callback(err, rows);
